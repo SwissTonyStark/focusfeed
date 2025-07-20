@@ -1,0 +1,38 @@
+[
+  {
+    "id": "1",
+    "title": "El futuro de la IA en startups: Tendencias 2024",
+    "summary": "Análisis completo de cómo la inteligencia artificial está transformando el ecosistema de startups y las oportunidades emergentes para emprendedores.",
+    "fullText": "La inteligencia artificial ha revolucionado la forma en que las startups operan y crecen. En 2024, vemos tendencias emergentes que están redefiniendo el panorama empresarial. Desde la automatización de procesos hasta la personalización de experiencias de usuario, la IA se ha convertido en un diferenciador clave para las empresas emergentes. Este artículo explora las principales tendencias y cómo las startups pueden aprovechar estas tecnologías para obtener una ventaja competitiva.",
+    "originalLink": "https://ejemplo.com/ia-startups-2024",
+    "score": 85,
+    "estimatedDuration": 8,
+    "category": "IA",
+    "createdAt": "2024-01-15T10:30:00Z",
+    "updatedAt": "2024-01-15T10:30:00Z"
+  },
+  {
+    "id": "2",
+    "title": "Fintech: La revolución digital en las finanzas",
+    "summary": "Cómo las empresas fintech están democratizando el acceso a servicios financieros y transformando la industria bancaria tradicional.",
+    "fullText": "El sector fintech ha experimentado un crecimiento exponencial en los últimos años, impulsado por la digitalización y la demanda de servicios financieros más accesibles. Las startups fintech están rompiendo barreras tradicionales y ofreciendo soluciones innovadoras que desafían a los bancos establecidos. Desde pagos móviles hasta préstamos peer-to-peer, la tecnología está democratizando el acceso a servicios financieros de calidad.",
+    "originalLink": "https://ejemplo.com/fintech-revolucion",
+    "score": 92,
+    "estimatedDuration": 12,
+    "category": "Finanzas",
+    "createdAt": "2024-01-14T15:45:00Z",
+    "updatedAt": "2024-01-14T15:45:00Z"
+  },
+  {
+    "id": "3",
+    "title": "Productividad con IA: Herramientas que transforman el trabajo",
+    "summary": "Descubre las mejores herramientas de IA para aumentar la productividad personal y empresarial en 2024.",
+    "fullText": "La inteligencia artificial está transformando la forma en que trabajamos, ofreciendo herramientas que automatizan tareas repetitivas y mejoran la eficiencia. Desde asistentes virtuales hasta herramientas de análisis de datos, la IA está democratizando capacidades que antes solo estaban disponibles para grandes empresas. Este artículo presenta las herramientas más efectivas y cómo implementarlas en tu flujo de trabajo diario.",
+    "originalLink": "https://ejemplo.com/productividad-ia",
+    "score": 78,
+    "estimatedDuration": 10,
+    "category": "Productividad",
+    "createdAt": "2024-01-13T09:20:00Z",
+    "updatedAt": "2024-01-13T09:20:00Z"
+  }
+] 
