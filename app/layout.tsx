@@ -7,10 +7,26 @@ const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
   title: 'FocusFeed - Tu fuente de contenido inteligente',
-  description: 'Descubre contenido relevante y de alto valor con análisis de IA',
-  keywords: ['IA', 'Startups', 'Finanzas', 'Tecnología', 'Contenido', 'Análisis'],
+  description: 'Descubre contenido relevante y de alto valor con análisis de IA. Biblioteca de conocimiento personalizada con insights avanzados.',
+  keywords: ['IA', 'Startups', 'Finanzas', 'Tecnología', 'Contenido', 'Análisis', 'Biblioteca de Conocimiento', 'Insights'],
   authors: [{ name: 'FocusFeed Team' }],
   viewport: 'width=device-width, initial-scale=1',
+  icons: {
+    icon: '/favicon.svg',
+    shortcut: '/favicon.svg',
+    apple: '/favicon.svg',
+  },
+  openGraph: {
+    title: 'FocusFeed - Tu fuente de contenido inteligente',
+    description: 'Descubre contenido relevante y de alto valor con análisis de IA',
+    type: 'website',
+    locale: 'es_ES',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'FocusFeed - Tu fuente de contenido inteligente',
+    description: 'Descubre contenido relevante y de alto valor con análisis de IA',
+  },
 }
 
 export default function RootLayout({

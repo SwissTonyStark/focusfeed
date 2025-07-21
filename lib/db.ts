@@ -72,4 +72,58 @@ export async function saveUserPreferences(preferences: UserPreferences): Promise
 
 export function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).substr(2)
+}
+
+export async function getContentById(id: string): Promise<Content | null> {
+  const contents = await getAllContent()
+  return contents.find(content => content.id === id) || null
+}
+
+export async function deleteContent(id: string): Promise<void> {
+  await initializeFiles()
+  const contents = await getAllContent()
+  const filteredContents = contents.filter(content => content.id !== id)
+  await fs.writeFile(CONTENT_FILE, JSON.stringify(filteredContents, null, 2))
+}
+
+export async function updateContent(id: string, updates: Partial<Content>): Promise<Content> {
+  await initializeFiles()
+  const contents = await getAllContent()
+  const index = contents.findIndex(content => content.id === id)
+  
+  if (index === -1) {
+    throw new Error('Content not found')
+  }
+  
+  contents[index] = {
+    ...contents[index],
+    ...updates,
+    updatedAt: new Date().toISOString()
+  }
+  
+  await fs.writeFile(CONTENT_FILE, JSON.stringify(contents, null, 2))
+  return contents[index]
+}
+
+export async function softDeleteContent(id: string): Promise<void> {
+  await updateContent(id, { isDeleted: true })
+}
+
+export async function restoreContent(id: string): Promise<void> {
+  await updateContent(id, { isDeleted: false })
+}
+
+export async function bookmarkContent(id: string, bookmarked: boolean): Promise<void> {
+  await updateContent(id, { isBookmarked: bookmarked })
+}
+
+export async function incrementReadCount(id: string): Promise<void> {
+  const content = await getContentById(id)
+  if (content) {
+    const currentCount = content.readCount || 0
+    await updateContent(id, { 
+      readCount: currentCount + 1,
+      lastReadAt: new Date().toISOString()
+    })
+  }
 } 
