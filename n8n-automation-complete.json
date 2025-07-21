@@ -1,0 +1,622 @@
+{
+  "name": "FocusFeed Content Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "id": "cron-trigger",
+      "name": "Cron Trigger",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://techcrunch.com/feed/",
+        "options": {}
+      },
+      "id": "techcrunch-rss",
+      "name": "TechCrunch RSS",
+      "type": "n8n-nodes-base.rssRead",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://feeds.feedburner.com/TechCrunch/",
+        "options": {}
+      },
+      "id": "techcrunch-feedburner",
+      "name": "TechCrunch Feedburner",
+      "type": "n8n-nodes-base.rssRead",
+      "typeVersion": 1,
+      "position": [460, 400]
+    },
+    {
+      "parameters": {
+        "url": "https://www.theverge.com/rss/index.xml",
+        "options": {}
+      },
+      "id": "verge-rss",
+      "name": "The Verge RSS",
+      "type": "n8n-nodes-base.rssRead",
+      "typeVersion": 1,
+      "position": [460, 500]
+    },
+    {
+      "parameters": {
+        "url": "https://feeds.arstechnica.com/arstechnica/index",
+        "options": {}
+      },
+      "id": "arstechnica-rss",
+      "name": "Ars Technica RSS",
+      "type": "n8n-nodes-base.rssRead",
+      "typeVersion": 1,
+      "position": [460, 600]
+    },
+    {
+      "parameters": {
+        "url": "https://www.wired.com/feed/rss",
+        "options": {}
+      },
+      "id": "wired-rss",
+      "name": "Wired RSS",
+      "type": "n8n-nodes-base.rssRead",
+      "typeVersion": 1,
+      "position": [460, 700]
+    },
+    {
+      "parameters": {
+        "url": "https://www.artificialintelligence-news.com/feed/",
+        "options": {}
+      },
+      "id": "ai-news-rss",
+      "name": "AI News RSS",
+      "type": "n8n-nodes-base.rssRead",
+      "typeVersion": 1,
+      "position": [460, 800]
+    },
+    {
+      "parameters": {
+        "url": "https://www.startupgrind.com/feed/",
+        "options": {}
+      },
+      "id": "startupgrind-rss",
+      "name": "StartupGrind RSS",
+      "type": "n8n-nodes-base.rssRead",
+      "typeVersion": 1,
+      "position": [460, 900]
+    },
+    {
+      "parameters": {
+        "url": "https://feeds.feedburner.com/venturebeat/SZYF",
+        "options": {}
+      },
+      "id": "venturebeat-rss",
+      "name": "VentureBeat RSS",
+      "type": "n8n-nodes-base.rssRead",
+      "typeVersion": 1,
+      "position": [460, 1000]
+    },
+    {
+      "parameters": {
+        "url": "https://www.coindesk.com/arc/outboundfeeds/rss/",
+        "options": {}
+      },
+      "id": "coindesk-rss",
+      "name": "CoinDesk RSS",
+      "type": "n8n-nodes-base.rssRead",
+      "typeVersion": 1,
+      "position": [460, 1100]
+    },
+    {
+      "parameters": {
+        "url": "https://www.cnbc.com/id/100003114/device/rss/rss.html",
+        "options": {}
+      },
+      "id": "cnbc-rss",
+      "name": "CNBC RSS",
+      "type": "n8n-nodes-base.rssRead",
+      "typeVersion": 1,
+      "position": [460, 1200]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition"
+      },
+      "id": "merge-all-feeds",
+      "name": "Merge All Feeds",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2,
+      "position": [680, 750]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "filter-by-date",
+              "leftValue": "={{ $json.pubDate }}",
+              "rightValue": "={{ new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString() }}",
+              "operator": {
+                "type": "date",
+                "operation": "after"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "filter-recent",
+      "name": "Filter Recent Articles",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [900, 750]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Categorizar artículos basado en palabras clave\nconst categories = {\n  'IA': ['ai', 'artificial intelligence', 'machine learning', 'deep learning', 'neural network', 'chatgpt', 'openai', 'gpt', 'llm'],\n  'Startups': ['startup', 'venture capital', 'funding', 'series a', 'series b', 'unicorn', 'entrepreneur', 'founder'],\n  'Finanzas': ['finance', 'investment', 'trading', 'cryptocurrency', 'bitcoin', 'ethereum', 'blockchain', 'defi', 'nft'],\n  'Tecnología': ['technology', 'tech', 'software', 'hardware', 'app', 'platform', 'digital'],\n  'Marketing': ['marketing', 'advertising', 'brand', 'campaign', 'social media', 'growth'],\n  'Productividad': ['productivity', 'efficiency', 'automation', 'workflow', 'tools', 'saas']\n};\n\n// Función para determinar categoría\nfunction getCategory(title, description) {\n  const text = (title + ' ' + description).toLowerCase();\n  \n  for (const [category, keywords] of Object.entries(categories)) {\n    if (keywords.some(keyword => text.includes(keyword))) {\n      return category;\n    }\n  }\n  \n  return 'Tecnología'; // Default\n}\n\n// Función para calcular score basado en relevancia\nfunction calculateScore(title, description, category) {\n  let score = 60; // Base score\n  \n  const text = (title + ' ' + description).toLowerCase();\n  \n  // Bonus por palabras clave importantes\n  const importantKeywords = ['ai', 'startup', 'funding', 'innovation', 'breakthrough', 'launch', 'acquisition'];\n  const keywordMatches = importantKeywords.filter(keyword => text.includes(keyword)).length;\n  score += keywordMatches * 5;\n  \n  // Bonus por categoría\n  if (category === 'IA') score += 10;\n  if (category === 'Startups') score += 8;\n  if (category === 'Finanzas') score += 6;\n  \n  // Bonus por longitud (contenido más detallado)\n  if (description.length > 200) score += 5;\n  \n  return Math.min(score, 100);\n}\n\n// Función para extraer tags\nfunction extractTags(title, description) {\n  const text = (title + ' ' + description).toLowerCase();\n  const commonTags = [\n    'ai', 'startup', 'funding', 'technology', 'innovation', 'business', \n    'finance', 'crypto', 'blockchain', 'software', 'hardware', 'mobile',\n    'web', 'cloud', 'security', 'privacy', 'data', 'analytics'\n  ];\n  \n  return commonTags.filter(tag => text.includes(tag)).slice(0, 5);\n}\n\n// Procesar cada artículo\nfor (const item of $input.all()) {\n  const title = item.json.title || '';\n  const description = item.json.description || '';\n  const category = getCategory(title, description);\n  const score = calculateScore(title, description, category);\n  const tags = extractTags(title, description);\n  \n  // Calcular tiempo estimado de lectura\n  const wordCount = (title + ' ' + description).split(' ').length;\n  const estimatedDuration = Math.max(2, Math.ceil(wordCount / 200)); // ~200 palabras por minuto\n  \n  // Generar insights básicos\n  const insights = [];\n  \n  if (score >= 80) {\n    insights.push({\n      id: `insight-${Date.now()}-1`,\n      type: 'trend',\n      title: 'Tendencia Emergente',\n      description: 'Este contenido indica una tendencia significativa en el mercado.',\n      priority: 'high',\n      createdAt: new Date().toISOString()\n    });\n  }\n  \n  if (category === 'IA') {\n    insights.push({\n      id: `insight-${Date.now()}-2`,\n      type: 'key_point',\n      title: 'Avance en IA',\n      description: 'Importante desarrollo en inteligencia artificial.',\n      priority: 'high',\n      createdAt: new Date().toISOString()\n    });\n  }\n  \n  if (category === 'Startups') {\n    insights.push({\n      id: `insight-${Date.now()}-3`,\n      type: 'action_item',\n      title: 'Oportunidad de Mercado',\n      description: 'Posible oportunidad para inversión o colaboración.',\n      priority: 'medium',\n      isActionable: true,\n      actionItems: [\n        'Investigar más sobre la empresa',\n        'Evaluar potencial de mercado',\n        'Considerar oportunidades de colaboración'\n      ],\n      createdAt: new Date().toISOString()\n    });\n  }\n  \n  // Actualizar el item con la información procesada\n  item.json = {\n    ...item.json,\n    category,\n    score,\n    tags,\n    estimatedDuration,\n    insights,\n    readCount: 0,\n    isBookmarked: false,\n    isDeleted: false,\n    createdAt: new Date().toISOString(),\n    updatedAt: new Date().toISOString()\n  };\n}\n\nreturn $input.all();"
+      },
+      "id": "process-content",
+      "name": "Process Content",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [1120, 750]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "filter-high-score",
+              "leftValue": "={{ $json.score }}",
+              "rightValue": 70,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "filter-high-quality",
+      "name": "Filter High Quality",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1340, 750]
+    },
+    {
+      "parameters": {
+        "url": "http://192.168.1.163:3001/api/webhook/new-content",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Source",
+              "value": "n8n-automation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "title",
+              "value": "={{ $json.title }}"
+            },
+            {
+              "name": "summary",
+              "value": "={{ $json.description }}"
+            },
+            {
+              "name": "fullText",
+              "value": "={{ $json.description }}"
+            },
+            {
+              "name": "originalLink",
+              "value": "={{ $json.link }}"
+            },
+            {
+              "name": "score",
+              "value": "={{ $json.score }}"
+            },
+            {
+              "name": "estimatedDuration",
+              "value": "={{ $json.estimatedDuration }}"
+            },
+            {
+              "name": "category",
+              "value": "={{ $json.category }}"
+            },
+            {
+              "name": "tags",
+              "value": "={{ $json.tags }}"
+            },
+            {
+              "name": "insights",
+              "value": "={{ $json.insights }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "send-to-focusfeed",
+      "name": "Send to FocusFeed",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1560, 750]
+    },
+    {
+      "parameters": {
+        "url": "http://192.168.1.163:3001/api/stats",
+        "options": {}
+      },
+      "id": "get-stats",
+      "name": "Get Stats",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1780, 750]
+    },
+    {
+      "parameters": {
+        "url": "http://192.168.1.163:3001/api/content",
+        "options": {}
+      },
+      "id": "get-content",
+      "name": "Get Content",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1780, 850]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Crear resumen de la ejecución\nconst stats = $input.first().json;\nconst content = $input.all()[1].json;\n\nconst summary = {\n  executionTime: new Date().toISOString(),\n  stats: {\n    totalContent: stats.overview.total,\n    activeContent: stats.overview.active,\n    averageScore: stats.metrics.averageScore,\n    totalInsights: stats.metrics.totalInsights\n  },\n  recentContent: content.content?.slice(0, 5).map(item => ({\n    title: item.title,\n    category: item.category,\n    score: item.score\n  })) || [],\n  message: `Automatización ejecutada exitosamente. ${content.content?.length || 0} artículos procesados.`\n};\n\nreturn [{ json: summary }];"
+      },
+      "id": "create-summary",
+      "name": "Create Summary",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [2000, 800]
+    },
+    {
+      "parameters": {
+        "url": "http://192.168.1.163:3001/api/webhook/notification",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "message",
+              "value": "={{ $json.message }}"
+            },
+            {
+              "name": "stats",
+              "value": "={{ $json.stats }}"
+            },
+            {
+              "name": "recentContent",
+              "value": "={{ $json.recentContent }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "send-notification",
+      "name": "Send Notification",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [2220, 800]
+    }
+  ],
+  "connections": {
+    "Cron Trigger": {
+      "main": [
+        [
+          {
+            "node": "TechCrunch RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "TechCrunch Feedburner",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "The Verge RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Ars Technica RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Wired RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "AI News RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "StartupGrind RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "VentureBeat RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "CoinDesk RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "CNBC RSS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TechCrunch RSS": {
+      "main": [
+        [
+          {
+            "node": "Merge All Feeds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TechCrunch Feedburner": {
+      "main": [
+        [
+          {
+            "node": "Merge All Feeds",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "The Verge RSS": {
+      "main": [
+        [
+          {
+            "node": "Merge All Feeds",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Ars Technica RSS": {
+      "main": [
+        [
+          {
+            "node": "Merge All Feeds",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Wired RSS": {
+      "main": [
+        [
+          {
+            "node": "Merge All Feeds",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "AI News RSS": {
+      "main": [
+        [
+          {
+            "node": "Merge All Feeds",
+            "type": "main",
+            "index": 5
+          }
+        ]
+      ]
+    },
+    "StartupGrind RSS": {
+      "main": [
+        [
+          {
+            "node": "Merge All Feeds",
+            "type": "main",
+            "index": 6
+          }
+        ]
+      ]
+    },
+    "VentureBeat RSS": {
+      "main": [
+        [
+          {
+            "node": "Merge All Feeds",
+            "type": "main",
+            "index": 7
+          }
+        ]
+      ]
+    },
+    "CoinDesk RSS": {
+      "main": [
+        [
+          {
+            "node": "Merge All Feeds",
+            "type": "main",
+            "index": 8
+          }
+        ]
+      ]
+    },
+    "CNBC RSS": {
+      "main": [
+        [
+          {
+            "node": "Merge All Feeds",
+            "type": "main",
+            "index": 9
+          }
+        ]
+      ]
+    },
+    "Merge All Feeds": {
+      "main": [
+        [
+          {
+            "node": "Filter Recent Articles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Recent Articles": {
+      "main": [
+        [
+          {
+            "node": "Process Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Content": {
+      "main": [
+        [
+          {
+            "node": "Filter High Quality",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter High Quality": {
+      "main": [
+        [
+          {
+            "node": "Send to FocusFeed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send to FocusFeed": {
+      "main": [
+        [
+          {
+            "node": "Get Stats",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Stats": {
+      "main": [
+        [
+          {
+            "node": "Create Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Content": {
+      "main": [
+        [
+          {
+            "node": "Create Summary",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Create Summary": {
+      "main": [
+        [
+          {
+            "node": "Send Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2025-07-21T00:30:00.000Z",
+      "updatedAt": "2025-07-21T00:30:00.000Z",
+      "id": "focusfeed-automation",
+      "name": "FocusFeed"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2025-07-21T00:30:00.000Z",
+  "versionId": "1"
+} 
