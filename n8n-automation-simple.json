@@ -1,0 +1,241 @@
+{
+  "name": "FocusFeed Simple Automation",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "id": "cron-trigger",
+      "name": "Cron Trigger",
+      "type": "n8n-nodes-base.cron",
+      "typeVersion": 1,
+      "position": [240, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://techcrunch.com/feed/",
+        "options": {}
+      },
+      "id": "techcrunch-rss",
+      "name": "TechCrunch RSS",
+      "type": "n8n-nodes-base.rssRead",
+      "typeVersion": 1,
+      "position": [460, 300]
+    },
+    {
+      "parameters": {
+        "url": "https://www.theverge.com/rss/index.xml",
+        "options": {}
+      },
+      "id": "verge-rss",
+      "name": "The Verge RSS",
+      "type": "n8n-nodes-base.rssRead",
+      "typeVersion": 1,
+      "position": [460, 400]
+    },
+    {
+      "parameters": {
+        "url": "https://feeds.arstechnica.com/arstechnica/index",
+        "options": {}
+      },
+      "id": "arstechnica-rss",
+      "name": "Ars Technica RSS",
+      "type": "n8n-nodes-base.rssRead",
+      "typeVersion": 1,
+      "position": [460, 500]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition"
+      },
+      "id": "merge-feeds",
+      "name": "Merge Feeds",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2,
+      "position": [680, 400]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Procesar artículos RSS\nfor (const item of $input.all()) {\n  const title = item.json.title || '';\n  const description = item.json.description || '';\n  \n  // Categorizar basado en palabras clave\n  let category = 'Tecnología';\n  const text = (title + ' ' + description).toLowerCase();\n  \n  if (text.includes('ai') || text.includes('artificial intelligence') || text.includes('machine learning')) {\n    category = 'IA';\n  } else if (text.includes('startup') || text.includes('funding') || text.includes('venture')) {\n    category = 'Startups';\n  } else if (text.includes('finance') || text.includes('crypto') || text.includes('bitcoin')) {\n    category = 'Finanzas';\n  }\n  \n  // Calcular score\n  let score = 60;\n  if (text.includes('funding') || text.includes('acquisition')) score += 20;\n  if (text.includes('ai') || text.includes('revolutionary')) score += 15;\n  if (description.length > 200) score += 10;\n  score = Math.min(score, 100);\n  \n  // Extraer tags\n  const tags = ['technology'];\n  if (text.includes('ai')) tags.push('ai');\n  if (text.includes('startup')) tags.push('startup');\n  if (text.includes('funding')) tags.push('funding');\n  \n  // Actualizar item\n  item.json = {\n    ...item.json,\n    category,\n    score,\n    tags,\n    estimatedDuration: Math.max(2, Math.ceil((title + ' ' + description).split(' ').length / 200)),\n    insights: [],\n    readCount: 0,\n    isBookmarked: false,\n    isDeleted: false,\n    createdAt: new Date().toISOString(),\n    updatedAt: new Date().toISOString()\n  };\n}\n\nreturn $input.all();"
+      },
+      "id": "process-content",
+      "name": "Process Content",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [900, 400]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "filter-score",
+              "leftValue": "={{ $json.score }}",
+              "rightValue": 70,
+              "operator": {
+                "type": "number",
+                "operation": "gte"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "filter-quality",
+      "name": "Filter High Quality",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [1120, 400]
+    },
+    {
+      "parameters": {
+        "url": "http://192.168.1.163:3001/api/content",
+        "method": "POST",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            },
+            {
+              "name": "X-Source",
+              "value": "n8n-automation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyContentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"title\": \"{{ $json.title }}\",\n  \"summary\": \"{{ $json.description }}\",\n  \"fullText\": \"{{ $json.description }}\",\n  \"originalLink\": \"{{ $json.link }}\",\n  \"score\": {{ $json.score }},\n  \"estimatedDuration\": {{ $json.estimatedDuration }},\n  \"category\": \"{{ $json.category }}\",\n  \"tags\": {{ JSON.stringify($json.tags) }},\n  \"insights\": []\n}",
+        "options": {
+          "timeout": 30000
+        }
+      },
+      "id": "send-to-focusfeed",
+      "name": "Send to FocusFeed",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [1340, 400]
+    }
+  ],
+  "connections": {
+    "Cron Trigger": {
+      "main": [
+        [
+          {
+            "node": "TechCrunch RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "The Verge RSS",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Ars Technica RSS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TechCrunch RSS": {
+      "main": [
+        [
+          {
+            "node": "Merge Feeds",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "The Verge RSS": {
+      "main": [
+        [
+          {
+            "node": "Merge Feeds",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Ars Technica RSS": {
+      "main": [
+        [
+          {
+            "node": "Merge Feeds",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Merge Feeds": {
+      "main": [
+        [
+          {
+            "node": "Process Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Content": {
+      "main": [
+        [
+          {
+            "node": "Filter High Quality",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter High Quality": {
+      "main": [
+        [
+          {
+            "node": "Send to FocusFeed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "tags": [
+    {
+      "createdAt": "2025-07-21T10:00:00.000Z",
+      "updatedAt": "2025-07-21T10:00:00.000Z",
+      "id": "focusfeed-automation",
+      "name": "FocusFeed"
+    }
+  ],
+  "triggerCount": 1,
+  "updatedAt": "2025-07-21T10:00:00.000Z",
+  "versionId": "1"
+} 
