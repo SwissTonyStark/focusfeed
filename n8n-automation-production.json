@@ -1,5 +1,5 @@
 {
-  "name": "FocusFeed Content Automation",
+  "name": "FocusFeed Content Automation - Production",
   "nodes": [
     {
       "parameters": {
@@ -170,7 +170,7 @@
     },
     {
       "parameters": {
-        "jsCode": "// Categorizar artículos basado en palabras clave\nconst categories = {\n  'IA': ['ai', 'artificial intelligence', 'machine learning', 'deep learning', 'neural network', 'chatgpt', 'openai', 'gpt', 'llm'],\n  'Startups': ['startup', 'venture capital', 'funding', 'series a', 'series b', 'unicorn', 'entrepreneur', 'founder'],\n  'Finanzas': ['finance', 'investment', 'trading', 'cryptocurrency', 'bitcoin', 'ethereum', 'blockchain', 'defi', 'nft'],\n  'Tecnología': ['technology', 'tech', 'software', 'hardware', 'app', 'platform', 'digital'],\n  'Marketing': ['marketing', 'advertising', 'brand', 'campaign', 'social media', 'growth'],\n  'Productividad': ['productivity', 'efficiency', 'automation', 'workflow', 'tools', 'saas']\n};\n\n// Función para determinar categoría\nfunction getCategory(title, description) {\n  const text = (title + ' ' + description).toLowerCase();\n  \n  for (const [category, keywords] of Object.entries(categories)) {\n    if (keywords.some(keyword => text.includes(keyword))) {\n      return category;\n    }\n  }\n  \n  return 'Tecnología'; // Default\n}\n\n// Función para calcular score basado en relevancia\nfunction calculateScore(title, description, category) {\n  let score = 60; // Base score\n  \n  const text = (title + ' ' + description).toLowerCase();\n  \n  // Bonus por palabras clave importantes\n  const importantKeywords = ['ai', 'startup', 'funding', 'innovation', 'breakthrough', 'launch', 'acquisition'];\n  const keywordMatches = importantKeywords.filter(keyword => text.includes(keyword)).length;\n  score += keywordMatches * 5;\n  \n  // Bonus por categoría\n  if (category === 'IA') score += 10;\n  if (category === 'Startups') score += 8;\n  if (category === 'Finanzas') score += 6;\n  \n  // Bonus por longitud (contenido más detallado)\n  if (description.length > 200) score += 5;\n  \n  return Math.min(score, 100);\n}\n\n// Función para extraer tags\nfunction extractTags(title, description) {\n  const text = (title + ' ' + description).toLowerCase();\n  const commonTags = [\n    'ai', 'startup', 'funding', 'technology', 'innovation', 'business', \n    'finance', 'crypto', 'blockchain', 'software', 'hardware', 'mobile',\n    'web', 'cloud', 'security', 'privacy', 'data', 'analytics'\n  ];\n  \n  return commonTags.filter(tag => text.includes(tag)).slice(0, 5);\n}\n\n// Procesar cada artículo\nfor (const item of $input.all()) {\n  const title = item.json.title || '';\n  const description = item.json.description || '';\n  const category = getCategory(title, description);\n  const score = calculateScore(title, description, category);\n  const tags = extractTags(title, description);\n  \n  // Calcular tiempo estimado de lectura\n  const wordCount = (title + ' ' + description).split(' ').length;\n  const estimatedDuration = Math.max(2, Math.ceil(wordCount / 200)); // ~200 palabras por minuto\n  \n  // Generar insights básicos\n  const insights = [];\n  \n  if (score >= 80) {\n    insights.push({\n      id: `insight-${Date.now()}-1`,\n      type: 'trend',\n      title: 'Tendencia Emergente',\n      description: 'Este contenido indica una tendencia significativa en el mercado.',\n      priority: 'high',\n      createdAt: new Date().toISOString()\n    });\n  }\n  \n  if (category === 'IA') {\n    insights.push({\n      id: `insight-${Date.now()}-2`,\n      type: 'key_point',\n      title: 'Avance en IA',\n      description: 'Importante desarrollo en inteligencia artificial.',\n      priority: 'high',\n      createdAt: new Date().toISOString()\n    });\n  }\n  \n  if (category === 'Startups') {\n    insights.push({\n      id: `insight-${Date.now()}-3`,\n      type: 'action_item',\n      title: 'Oportunidad de Mercado',\n      description: 'Posible oportunidad para inversión o colaboración.',\n      priority: 'medium',\n      isActionable: true,\n      actionItems: [\n        'Investigar más sobre la empresa',\n        'Evaluar potencial de mercado',\n        'Considerar oportunidades de colaboración'\n      ],\n      createdAt: new Date().toISOString()\n    });\n  }\n  \n  // Actualizar el item con la información procesada\n  item.json = {\n    ...item.json,\n    category,\n    score,\n    tags,\n    estimatedDuration,\n    insights,\n    readCount: 0,\n    isBookmarked: false,\n    isDeleted: false,\n    createdAt: new Date().toISOString(),\n    updatedAt: new Date().toISOString()\n  };\n}\n\nreturn $input.all();"
+        "jsCode": "// Categorizar artículos basado en palabras clave\nconst categories = {\n  'IA': ['ai', 'artificial intelligence', 'machine learning', 'deep learning', 'neural network', 'chatgpt', 'openai', 'gpt', 'llm', 'generative ai', 'automation'],\n  'Startups': ['startup', 'venture capital', 'funding', 'series a', 'series b', 'unicorn', 'entrepreneur', 'founder', 'seed round', 'ipo', 'acquisition'],\n  'Finanzas': ['finance', 'investment', 'trading', 'cryptocurrency', 'bitcoin', 'ethereum', 'blockchain', 'defi', 'nft', 'stock market', 'economy'],\n  'Tecnología': ['technology', 'tech', 'software', 'hardware', 'app', 'platform', 'digital', 'innovation'],\n  'Marketing': ['marketing', 'advertising', 'brand', 'campaign', 'social media', 'growth', 'customer acquisition'],\n  'Productividad': ['productivity', 'efficiency', 'automation', 'workflow', 'tools', 'saas', 'business']\n};\n\n// Función para determinar categoría\nfunction getCategory(title, description) {\n  const text = (title + ' ' + description).toLowerCase();\n  \n  for (const [category, keywords] of Object.entries(categories)) {\n    if (keywords.some(keyword => text.includes(keyword))) {\n      return category;\n    }\n  }\n  \n  return 'Tecnología'; // Default\n}\n\n// Función para calcular score basado en relevancia\nfunction calculateScore(title, description, category) {\n  let score = 60; // Base score\n  \n  const text = (title + ' ' + description).toLowerCase();\n  \n  // Bonus por palabras clave importantes\n  const importantKeywords = ['ai', 'startup', 'funding', 'innovation', 'breakthrough', 'launch', 'acquisition', 'revolutionary', 'disruptive'];\n  const keywordMatches = importantKeywords.filter(keyword => text.includes(keyword)).length;\n  score += keywordMatches * 5;\n  \n  // Bonus por categoría\n  if (category === 'IA') score += 10;\n  if (category === 'Startups') score += 8;\n  if (category === 'Finanzas') score += 6;\n  \n  // Bonus por longitud (contenido más detallado)\n  if (description.length > 200) score += 5;\n  \n  // Bonus por palabras clave específicas\n  if (text.includes('funding') || text.includes('series')) score += 8;\n  if (text.includes('acquisition') || text.includes('exit')) score += 10;\n  if (text.includes('revolutionary') || text.includes('breakthrough')) score += 7;\n  \n  return Math.min(score, 100);\n}\n\n// Función para extraer tags\nfunction extractTags(title, description) {\n  const text = (title + ' ' + description).toLowerCase();\n  const commonTags = [\n    'ai', 'startup', 'funding', 'technology', 'innovation', 'business', \n    'finance', 'crypto', 'blockchain', 'software', 'hardware', 'mobile',\n    'web', 'cloud', 'security', 'privacy', 'data', 'analytics', 'automation'\n  ];\n  \n  return commonTags.filter(tag => text.includes(tag)).slice(0, 5);\n}\n\n// Procesar cada artículo\nfor (const item of $input.all()) {\n  const title = item.json.title || '';\n  const description = item.json.description || '';\n  const category = getCategory(title, description);\n  const score = calculateScore(title, description, category);\n  const tags = extractTags(title, description);\n  \n  // Calcular tiempo estimado de lectura\n  const wordCount = (title + ' ' + description).split(' ').length;\n  const estimatedDuration = Math.max(2, Math.ceil(wordCount / 200)); // ~200 palabras por minuto\n  \n  // Generar insights básicos\n  const insights = [];\n  \n  if (score >= 80) {\n    insights.push({\n      id: `insight-${Date.now()}-1`,\n      type: 'trend',\n      title: 'Tendencia Emergente',\n      description: 'Este contenido indica una tendencia significativa en el mercado.',\n      priority: 'high',\n      createdAt: new Date().toISOString()\n    });\n  }\n  \n  if (category === 'IA') {\n    insights.push({\n      id: `insight-${Date.now()}-2`,\n      type: 'key_point',\n      title: 'Avance en IA',\n      description: 'Importante desarrollo en inteligencia artificial.',\n      priority: 'high',\n      createdAt: new Date().toISOString()\n    });\n  }\n  \n  if (category === 'Startups') {\n    insights.push({\n      id: `insight-${Date.now()}-3`,\n      type: 'action_item',\n      title: 'Oportunidad de Mercado',\n      description: 'Posible oportunidad para inversión o colaboración.',\n      priority: 'medium',\n      isActionable: true,\n      actionItems: [\n        'Investigar más sobre la empresa',\n        'Evaluar potencial de mercado',\n        'Considerar oportunidades de colaboración'\n      ],\n      createdAt: new Date().toISOString()\n    });\n  }\n  \n  // Actualizar el item con la información procesada\n  item.json = {\n    ...item.json,\n    category,\n    score,\n    tags,\n    estimatedDuration,\n    insights,\n    readCount: 0,\n    isBookmarked: false,\n    isDeleted: false,\n    createdAt: new Date().toISOString(),\n    updatedAt: new Date().toISOString()\n  };\n}\n\nreturn $input.all();"
       },
       "id": "process-content",
       "name": "Process Content",
@@ -209,7 +209,8 @@
     },
     {
       "parameters": {
-        "url": "http://192.168.1.163:3001/api/webhook/new-content",
+        "url": "http://192.168.1.163:3001/api/content",
+        "method": "POST",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
@@ -220,51 +221,20 @@
             {
               "name": "X-Source",
               "value": "n8n-automation"
+            },
+            {
+              "name": "User-Agent",
+              "value": "n8n-FocusFeed-Webhook/1.0"
             }
           ]
         },
         "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "title",
-              "value": "={{ $json.title }}"
-            },
-            {
-              "name": "summary",
-              "value": "={{ $json.description }}"
-            },
-            {
-              "name": "fullText",
-              "value": "={{ $json.description }}"
-            },
-            {
-              "name": "originalLink",
-              "value": "={{ $json.link }}"
-            },
-            {
-              "name": "score",
-              "value": "={{ $json.score }}"
-            },
-            {
-              "name": "estimatedDuration",
-              "value": "={{ $json.estimatedDuration }}"
-            },
-            {
-              "name": "category",
-              "value": "={{ $json.category }}"
-            },
-            {
-              "name": "tags",
-              "value": "={{ $json.tags }}"
-            },
-            {
-              "name": "insights",
-              "value": "={{ $json.insights }}"
-            }
-          ]
-        },
-        "options": {}
+        "bodyContentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"title\": \"{{ $json.title }}\",\n  \"summary\": \"{{ $json.description }}\",\n  \"fullText\": \"{{ $json.description }}\",\n  \"originalLink\": \"{{ $json.link }}\",\n  \"score\": {{ $json.score }},\n  \"estimatedDuration\": {{ $json.estimatedDuration }},\n  \"category\": \"{{ $json.category }}\",\n  \"tags\": {{ JSON.stringify($json.tags) }},\n  \"insights\": {{ JSON.stringify($json.insights) }}\n}",
+        "options": {
+          "timeout": 30000
+        }
       },
       "id": "send-to-focusfeed",
       "name": "Send to FocusFeed",
@@ -275,7 +245,10 @@
     {
       "parameters": {
         "url": "http://192.168.1.163:3001/api/stats",
-        "options": {}
+        "method": "GET",
+        "options": {
+          "timeout": 10000
+        }
       },
       "id": "get-stats",
       "name": "Get Stats",
@@ -286,7 +259,10 @@
     {
       "parameters": {
         "url": "http://192.168.1.163:3001/api/content",
-        "options": {}
+        "method": "GET",
+        "options": {
+          "timeout": 10000
+        }
       },
       "id": "get-content",
       "name": "Get Content",
@@ -307,33 +283,27 @@
     {
       "parameters": {
         "url": "http://192.168.1.163:3001/api/webhook/notification",
+        "method": "POST",
         "sendHeaders": true,
         "headerParameters": {
           "parameters": [
             {
               "name": "Content-Type",
               "value": "application/json"
+            },
+            {
+              "name": "X-Source",
+              "value": "n8n-automation"
             }
           ]
         },
         "sendBody": true,
-        "bodyParameters": {
-          "parameters": [
-            {
-              "name": "message",
-              "value": "={{ $json.message }}"
-            },
-            {
-              "name": "stats",
-              "value": "={{ $json.stats }}"
-            },
-            {
-              "name": "recentContent",
-              "value": "={{ $json.recentContent }}"
-            }
-          ]
-        },
-        "options": {}
+        "bodyContentType": "json",
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"message\": \"{{ $json.message }}\",\n  \"stats\": {{ JSON.stringify($json.stats) }},\n  \"recentContent\": {{ JSON.stringify($json.recentContent) }}\n}",
+        "options": {
+          "timeout": 10000
+        }
       },
       "id": "send-notification",
       "name": "Send Notification",
@@ -610,13 +580,13 @@
   "staticData": null,
   "tags": [
     {
-      "createdAt": "2025-07-21T00:30:00.000Z",
-      "updatedAt": "2025-07-21T00:30:00.000Z",
+      "createdAt": "2025-07-21T09:30:00.000Z",
+      "updatedAt": "2025-07-21T09:30:00.000Z",
       "id": "focusfeed-automation",
       "name": "FocusFeed"
     }
   ],
   "triggerCount": 1,
-  "updatedAt": "2025-07-21T00:30:00.000Z",
+  "updatedAt": "2025-07-21T09:30:00.000Z",
   "versionId": "1"
 } 

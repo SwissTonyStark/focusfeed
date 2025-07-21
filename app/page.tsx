@@ -45,8 +45,7 @@ export default function Home() {
   const [selectedContent, setSelectedContent] = useState<Content | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [stats, setStats] = useState<any>(null)
-  const [showDeleted, setShowDeleted] = useState(false)
-  const [showBookmarked, setShowBookmarked] = useState(false)
+  const [activeFilter, setActiveFilter] = useState<'all' | 'bookmarked' | 'deleted'>('all')
 
   const categories = ['Todas', 'IA', 'Startups', 'Finanzas', 'Tecnología', 'Marketing', 'Productividad']
 
@@ -57,9 +56,18 @@ export default function Home() {
       const params = new URLSearchParams()
       if (selectedCategory !== 'Todas') params.append('category', selectedCategory)
       if (searchTerm) params.append('search', searchTerm)
-      if (showDeleted) params.append('status', 'deleted')
-      else if (showBookmarked) params.append('status', 'bookmarked')
-      else params.append('status', 'active')
+      
+      // Aplicar filtro de estado
+      switch (activeFilter) {
+        case 'bookmarked':
+          params.append('status', 'bookmarked')
+          break
+        case 'deleted':
+          params.append('status', 'deleted')
+          break
+        default:
+          params.append('status', 'active')
+      }
 
       const response = await fetch(`/api/content?${params}`)
       const data = await response.json()
@@ -217,7 +225,7 @@ export default function Home() {
   useEffect(() => {
     loadContent()
     loadStats()
-  }, [selectedCategory, searchTerm, showDeleted, showBookmarked])
+  }, [selectedCategory, searchTerm, activeFilter])
 
   return (
     <ThemeProvider
@@ -263,7 +271,11 @@ export default function Home() {
 
                   <ThemeToggle />
                   
-                  <Button onClick={loadTestContent} disabled={loading}>
+                  <Button 
+                    onClick={loadTestContent} 
+                    disabled={loading}
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg hover:shadow-xl transition-all duration-200"
+                  >
                     <Plus className="mr-2 h-4 w-4" />
                     Obtener noticias frescas
                   </Button>
@@ -282,7 +294,7 @@ export default function Home() {
                   placeholder="Buscar contenido..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="w-full pl-10 pr-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors"
                 />
               </div>
             </div>
@@ -299,7 +311,7 @@ export default function Home() {
                   <Badge
                     key={category}
                     variant={selectedCategory === category ? "default" : "secondary"}
-                    className="cursor-pointer hover:bg-primary hover:text-primary-foreground"
+                    className="cursor-pointer hover:bg-primary hover:text-primary-foreground transition-colors"
                     onClick={() => setSelectedCategory(category)}
                   >
                     {category}
@@ -309,19 +321,19 @@ export default function Home() {
 
               <div className="flex items-center gap-2">
                 <Button
-                  variant="outline"
+                  variant={activeFilter === 'bookmarked' ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setShowBookmarked(!showBookmarked)}
-                  className={showBookmarked ? "bg-primary text-primary-foreground" : ""}
+                  onClick={() => setActiveFilter(activeFilter === 'bookmarked' ? 'all' : 'bookmarked')}
+                  className="transition-all duration-200"
                 >
                   <Bookmark className="mr-2 h-4 w-4" />
                   Guardados
                 </Button>
                 <Button
-                  variant="outline"
+                  variant={activeFilter === 'deleted' ? "default" : "outline"}
                   size="sm"
-                  onClick={() => setShowDeleted(!showDeleted)}
-                  className={showDeleted ? "bg-primary text-primary-foreground" : ""}
+                  onClick={() => setActiveFilter(activeFilter === 'deleted' ? 'all' : 'deleted')}
+                  className="transition-all duration-200"
                 >
                   <RotateCcw className="mr-2 h-4 w-4" />
                   Eliminados
@@ -340,12 +352,12 @@ export default function Home() {
                 {filteredContent.map((item) => (
                   <Card
                     key={item.id}
-                    className="hover:shadow-lg transition-shadow cursor-pointer group"
+                    className="hover:shadow-lg transition-all duration-200 cursor-pointer group border border-gray-200 dark:border-gray-700 hover:border-blue-300 dark:hover:border-blue-600"
                     onClick={() => handleContentClick(item)}
                   >
                     <CardHeader>
                       <div className="flex justify-between items-start">
-                        <CardTitle className="text-lg line-clamp-2 group-hover:text-primary transition-colors">
+                        <CardTitle className="text-lg line-clamp-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
                           {item.title}
                         </CardTitle>
                         <div className="flex items-center gap-2">
@@ -364,8 +376,8 @@ export default function Home() {
 
                     <CardContent>
                       <div className="flex flex-wrap gap-2 mb-3">
-                        <Badge variant="outline">{item.category}</Badge>
-                        <Badge className={`score-badge ${getScoreColor(item.score)}`}>
+                        <Badge variant="outline" className="text-xs">{item.category}</Badge>
+                        <Badge className={`score-badge ${getScoreColor(item.score)} text-xs`}>
                           {item.score}/100
                         </Badge>
                         <div className="flex items-center text-sm text-gray-600 dark:text-gray-400">
@@ -402,6 +414,11 @@ export default function Home() {
                             e.stopPropagation()
                             handleBookmark(item.id, item.isBookmarked)
                           }}
+                          className={`transition-all duration-200 ${
+                            item.isBookmarked 
+                              ? 'bg-yellow-50 border-yellow-200 text-yellow-700 hover:bg-yellow-100 dark:bg-yellow-900/20 dark:border-yellow-700 dark:text-yellow-300 dark:hover:bg-yellow-900/30' 
+                              : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                          }`}
                         >
                           {item.isBookmarked ? (
                             <BookmarkCheck className="h-4 w-4" />
@@ -420,6 +437,11 @@ export default function Home() {
                               handleDelete(item.id)
                             }
                           }}
+                          className={`transition-all duration-200 ${
+                            item.isDeleted 
+                              ? 'bg-green-50 border-green-200 text-green-700 hover:bg-green-100 dark:bg-green-900/20 dark:border-green-700 dark:text-green-300 dark:hover:bg-green-900/30' 
+                              : 'hover:bg-red-50 hover:border-red-200 hover:text-red-700 dark:hover:bg-red-900/20 dark:hover:border-red-700 dark:hover:text-red-300'
+                          }`}
                         >
                           {item.isDeleted ? (
                             <RotateCcw className="h-4 w-4" />
