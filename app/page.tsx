@@ -412,7 +412,7 @@ export default function Home() {
                           size="sm"
                           onClick={(e) => {
                             e.stopPropagation()
-                            handleBookmark(item.id, item.isBookmarked)
+                            handleBookmark(item.id, item.isBookmarked || false)
                           }}
                           className={`transition-all duration-200 ${
                             item.isBookmarked 

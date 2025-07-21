@@ -82,7 +82,7 @@ export function ContentDetailModal({
   }
 
   const handleBookmark = () => {
-    onBookmark(content.id, !content.isBookmarked)
+    onBookmark(content.id, !(content.isBookmarked || false))
   }
 
   const getScoreLabel = (score: number) => {

@@ -1,4 +1,4 @@
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Inter } from 'next/font/google'
 import './globals.css'
 import { ThemeProvider } from '@/components/theme-provider'
@@ -10,7 +10,7 @@ export const metadata: Metadata = {
   description: 'Descubre contenido relevante y de alto valor con análisis de IA. Biblioteca de conocimiento personalizada con insights avanzados.',
   keywords: ['IA', 'Startups', 'Finanzas', 'Tecnología', 'Contenido', 'Análisis', 'Biblioteca de Conocimiento', 'Insights'],
   authors: [{ name: 'FocusFeed Team' }],
-  viewport: 'width=device-width, initial-scale=1',
+  metadataBase: new URL('http://192.168.1.163:3001'),
   icons: {
     icon: '/favicon.svg',
     shortcut: '/favicon.svg',
@@ -27,6 +27,11 @@ export const metadata: Metadata = {
     title: 'FocusFeed - Tu fuente de contenido inteligente',
     description: 'Descubre contenido relevante y de alto valor con análisis de IA',
   },
+}
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
 }
 
 export default function RootLayout({
